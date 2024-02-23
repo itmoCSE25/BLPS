@@ -1,4 +1,6 @@
 package com.itmo.blss.model.db
 
-class Train {
+class Train(
+    val trainNum: Int
+) {
 }

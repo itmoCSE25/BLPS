@@ -1,12 +1,11 @@
-package com.itmo.blss.model.db
+package com.itmo.blss.model
 
-class Ticket(
-    val userId: Long,
+data class UserInfoDto(
     val name: String,
     val surname: String,
-    val routeId: Long,
+    val birthday: String,
     val trainId: Long,
+    val routeId: Long,
     val vanId: Long,
     val seatId: Long
-) {
-}
+)

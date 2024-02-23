@@ -1,8 +1,8 @@
-package com.itmo.blss.model.db
+package com.itmo.blss.api.response
 
 import com.itmo.blss.model.enums.VanType
 
-class Van(
+data class VanResponse(
     val vanType: VanType,
     val trainId: Long
 )
