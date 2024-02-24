@@ -25,6 +25,7 @@ class TrainsController(
     }
 
     private fun Train.toTrainResponse() = TrainResponse(
+        this.trainId,
         this.trainNum
     )
 }

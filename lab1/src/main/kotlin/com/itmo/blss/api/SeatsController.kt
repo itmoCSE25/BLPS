@@ -26,6 +26,6 @@ class SeatsController(
 
     private fun Seat.toSeatResponse() = SeatResponse(
         vanId = this.vanId,
-        ticketId = this.ticketId
+        seatId = this.seatId
     )
 }

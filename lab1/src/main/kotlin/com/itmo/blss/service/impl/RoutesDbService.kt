@@ -16,8 +16,9 @@ class RoutesDbService(
 
     override fun getRoutesWithFilter(routesFilter: RoutesFilter): List<Route> {
         //language=SQL
-        var sql = """
-            select 
+        val sql = """
+            select
+                r.id,
                 r.arrival_time,
                 r.departure_time,
                 arrival.name as arrival_station,
@@ -40,7 +41,7 @@ class RoutesDbService(
         val resSql = StringBuilder(sql)
         routesFilter.arrivalTime?.run {
             resSql.append("\nand r.arrival_time < :arrivalTime\n")
-            mapSqlParameterSource.addValue("arrivalTime", routesFilter.arrivalTime)
+            mapSqlParameterSource.addValue("arrivalTime", this)
         }
         routesFilter.departureTime?.run {
             resSql.append("\nand r.departure_time < :departureTime\n")

@@ -10,5 +10,6 @@ class ApiConstraints {
         const val TRAIN_ID_KEY = "trainId"
         const val VAN_ID_KEY = "vanId"
         const val USER_ID_KEY = "userId"
+        const val TICKET_IDS_KEY = "ticketIds"
     }
 }

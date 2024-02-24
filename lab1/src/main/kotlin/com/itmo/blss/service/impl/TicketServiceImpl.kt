@@ -1,8 +1,8 @@
 package com.itmo.blss.service.impl
 
+import com.itmo.blss.model.TicketFilter
 import com.itmo.blss.model.UserInfoDto
 import com.itmo.blss.model.db.Ticket
-import com.itmo.blss.model.enums.TransactionStatus
 import com.itmo.blss.service.BillingService
 import com.itmo.blss.service.TicketDbService
 import com.itmo.blss.service.TicketService
@@ -18,17 +18,21 @@ class TicketServiceImpl(
     private val billingService: BillingService
 ) : TicketService {
 
-    override fun createTicket(userId: Long, userInfoDto: UserInfoDto): TransactionStatus {
+    override fun createTicket(userId: Long, userInfoDto: UserInfoDto): Ticket {
         return transactionTemplate.execute {
-            val ticketId = ticketDbService.saveTicketInfo(userInfoDto.toDbTicket(userId))
+            val ticket = ticketDbService.saveTicketInfo(userInfoDto.toDbTicket(userId))
             val transaction = billingService.getInformationByTransaction()
             ticketDbService.saveTicketTransactionInfo(
-                ticketId = ticketId,
+                ticketId = ticket.ticketId,
                 transactionId =  transaction.first,
                 transactionStatus = transaction.second
             )
-            transaction.second
+            ticket
         } ?: throw RuntimeException()
+    }
+
+    override fun getTicketsByFilter(ticketFilter: TicketFilter): List<Ticket> {
+        return ticketDbService.getTicketsByFilter(ticketFilter)
     }
 
     private fun UserInfoDto.toDbTicket(userId: Long) = Ticket(

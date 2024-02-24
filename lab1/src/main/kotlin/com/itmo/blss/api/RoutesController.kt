@@ -43,6 +43,7 @@ class RoutesController(
     }
 
     private fun Route.toRouteResponse() = RouteResponse(
+        this.routeId,
         this.arrivalTime.toString(),
         this.departureTime.toString(),
         this.arrivalStation,

@@ -1,0 +1,25 @@
+### ROUTES. Получение доступных маршрутов по фильтру
+GET http://localhost:8080/api/routes
+
+### TRAINS. Получение номеров поездов
+GET http://localhost:8080/api/trains?routeId=1
+
+### VANS. Получение вагонов
+GET http://localhost:8080/api/vans?trainId=1
+
+### SEATS. Получение свободных мест
+GET http://localhost:8080/api/seats?vanId=1
+
+### TICKETS. Формирование билета
+POST http://localhost:8080/api/tickets/create?userId=1
+Content-Type: application/json
+
+{
+  "name": "Alex",
+  "surname": "Blazkov",
+  "birthday": "02-05-2000",
+  "trainId": 1,
+  "routeId": 1,
+  "vanId": 1,
+  "seatId": 1
+}

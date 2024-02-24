@@ -25,6 +25,7 @@ class VansController(
     }
 
     private fun Van.toVanResponse() = VanResponse(
+        vanId = this.vanId,
         vanType = this.vanType,
         trainId = this.trainId
     )

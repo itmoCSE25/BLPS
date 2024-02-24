@@ -4,8 +4,8 @@ data class UserInfoDto(
     val name: String,
     val surname: String,
     val birthday: String,
-    val trainId: Long,
     val routeId: Long,
+    val trainId: Long,
     val vanId: Long,
     val seatId: Long
 )
