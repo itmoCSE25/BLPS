@@ -42,21 +42,29 @@ create table vans
 
 create table seats
 (
-    id        serial primary key,
-    van_id    int references vans (id) on delete cascade not null
+    id     serial primary key,
+    van_id int references vans (id) on delete cascade not null
 );
 
 create table tickets
 (
-    id       serial primary key,
-    user_id  int references users (id) on delete cascade  not null,
-    name     text                                         not null,
-    surname  text                                         not null,
-    route_id int references routes (id) on delete cascade not null,
-    train_id int references trains (id) on delete cascade not null,
-    van_id   int references vans (id) on delete cascade   not null,
-    seat_id  int references seats (id) on delete cascade  not null,
-    transaction_status int,
-    transaction_id int,
+    id                 serial primary key,
+    user_id            int references users (id) on delete cascade  not null,
+    name               text                                         not null,
+    surname            text                                         not null,
+    route_id           int references routes (id) on delete cascade not null,
+    train_id           int references trains (id) on delete cascade not null,
+    van_id             int references vans (id) on delete cascade   not null,
+    seat_id            int references seats (id) on delete cascade  not null,
     unique (route_id, train_id, van_id, seat_id)
 );
+
+create table receipt
+(
+    id serial primary key,
+    user_id int references users(id) on delete cascade not null,
+    ticket_id int references tickets(id) on delete cascade not null,
+    transaction_id int,
+    transaction_status int,
+    unique (transaction_id)
+)

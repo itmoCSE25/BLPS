@@ -1,9 +1,10 @@
 package com.itmo.blss.service.impl
 
 import com.itmo.blss.model.TicketFilter
+import com.itmo.blss.model.TicketInfo
 import com.itmo.blss.model.db.Ticket
-import com.itmo.blss.model.enums.TransactionStatus
 import com.itmo.blss.service.TicketDbService
+import com.itmo.blss.utils.TICKET_INFO_MAPPER
 import com.itmo.blss.utils.TICKET_MAPPER
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -37,36 +38,22 @@ class TicketDbServiceImpl(
         ).firstOrNull() ?: throw RuntimeException()
     }
 
-    override fun saveTicketTransactionInfo(ticketId: Long, transactionId: Long, transactionStatus: TransactionStatus): Boolean {
+    override fun getTicketsInfoByFilter(ticketFilter: TicketFilter): List<TicketInfo> {
+        //language=SQL
         val sql = """
-            update tickets set
-                transaction_status = (:transactionStatus),
-                transaction_id = (:transactionId)
-            where id = (:ticketId)
-        """.trimIndent()
-
-        return namedParameterJdbcTemplate.update(
-            sql,
-            MapSqlParameterSource()
-                .addValue("transactionStatus", transactionStatus.code)
-                .addValue("transactionId", transactionId)
-                .addValue("ticketId", ticketId)
-        ) > 0
-    }
-
-    override fun getTicketsByFilter(ticketFilter: TicketFilter): List<Ticket> {
-        val sql = """
-            select 
-                t.user_id,
-                t.name,
-                t.surname,
-                t.route_id,
-                t.train_id,
-                t.van_id,
-                t.seat_id,
-                t.transaction_status,
-                t.transaction_id
+            select
+                t.id as id,
+                t.user_id as user_id,
+                t.name as name,
+                t.surname as surname,
+                t.route_id as route_id,
+                t.train_id as train_id,
+                t.van_id as van_id,
+                t.seat_id as seat_id,
+                r.transaction_status as transaction_status,
+                r.transaction_id as transaction_id
             from tickets t
+            left join receipt r on t.id = r.ticket_id
             where 1=1
         """.trimIndent()
 
@@ -75,7 +62,7 @@ class TicketDbServiceImpl(
         return namedParameterJdbcTemplate.query(
             sqlAndParams.first,
             sqlAndParams.second,
-            TICKET_MAPPER
+            TICKET_INFO_MAPPER
         )
     }
 

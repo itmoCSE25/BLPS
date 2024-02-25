@@ -1,12 +1,16 @@
 package com.itmo.blss.utils
 
+import com.itmo.blss.model.TicketInfo
+import com.itmo.blss.model.db.Receipt
 import com.itmo.blss.model.db.Route
 import com.itmo.blss.model.db.Seat
 import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.model.db.Train
 import com.itmo.blss.model.db.Van
+import com.itmo.blss.model.enums.TransactionStatus
 import com.itmo.blss.model.enums.VanType
 import org.springframework.jdbc.core.RowMapper
+import java.sql.ResultSet
 
 val ROUTE_MAPPER = RowMapper { rs, _: Int ->
     Route(
@@ -41,14 +45,28 @@ val SEAT_MAPPER = RowMapper { rs, _ ->
 }
 
 val TICKET_MAPPER = RowMapper { rs, _ ->
-    Ticket(
-        ticketId = rs.getLong("id"),
-        userId = rs.getLong("user_id"),
-        name = rs.getString("name"),
-        surname = rs.getString("surname"),
-        routeId = rs.getLong("route_id"),
-        trainId = rs.getLong("train_id"),
-        vanId = rs.getLong("van_id"),
-        seatId = rs.getLong("seat_id")
+    getTicketConstructor(rs)
+}
+
+val TICKET_INFO_MAPPER = RowMapper { rs, _ ->
+    TicketInfo(
+        getTicketConstructor(rs),
+        Receipt(
+            ticketId = rs.getLong("id"),
+            userId = rs.getLong("user_id"),
+            transactionId = rs.getLong("transaction_id"),
+            transactionStatus = TransactionStatus.from(rs.getInt("transaction_status")) ?: TransactionStatus.UNDEFINED
+        )
     )
 }
+
+private fun getTicketConstructor(rs: ResultSet) = Ticket(
+    ticketId = rs.getLong("id"),
+    userId = rs.getLong("user_id"),
+    name = rs.getString("name"),
+    surname = rs.getString("surname"),
+    routeId = rs.getLong("route_id"),
+    trainId = rs.getLong("train_id"),
+    vanId = rs.getLong("van_id"),
+    seatId = rs.getLong("seat_id")
+)

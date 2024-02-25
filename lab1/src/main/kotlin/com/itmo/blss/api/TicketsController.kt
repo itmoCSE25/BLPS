@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/tickets")
 class TicketsController(
-    private val ticketService: TicketService
+    private val ticketService: TicketService,
 ) {
 
     @PostMapping("/create")
@@ -30,13 +30,13 @@ class TicketsController(
     }
 
     @GetMapping
-    fun getTicketsByUserId(
+    fun getTicketsByFilter(
         @RequestParam(value = USER_ID_KEY)
-        userId: Long,
+        userId: Long?,
         @RequestParam(value = TICKET_IDS_KEY)
-        ticketIds: List<Long>
+        ticketIds: List<Long>?
     ): List<TicketResponse> {
-        return ticketService.getTicketsByFilter(
+        return ticketService.getTicketsInfoByFilter(
             TicketFilter(userId = userId, ticketIds = ticketIds)
         )
             .map { TicketResponse.new(it) }

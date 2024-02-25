@@ -23,3 +23,6 @@ Content-Type: application/json
   "vanId": 1,
   "seatId": 1
 }
+
+### TICKETS. Получение билетов по фильтру
+GET http://localhost:8080/api/tickets?userId=1
