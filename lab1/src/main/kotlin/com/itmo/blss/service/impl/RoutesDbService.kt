@@ -4,6 +4,7 @@ import com.itmo.blss.model.RoutesFilter
 import com.itmo.blss.model.db.Route
 import com.itmo.blss.service.RoutesDbService
 import com.itmo.blss.utils.ROUTE_MAPPER
+import org.springframework.jdbc.core.SingleColumnRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
@@ -34,6 +35,19 @@ class RoutesDbService(
             sqlAndParams.second,
             ROUTE_MAPPER
         )
+    }
+
+    override fun isRouteExist(routeId: Long): Boolean {
+        val sql = """
+            select id from routes
+            where id = (:routeId)
+        """.trimIndent()
+
+        return namedParameterJdbcTemplate.query(
+            sql,
+            MapSqlParameterSource("routeId", routeId),
+            SingleColumnRowMapper.newInstance(Long::class.java)
+        ).isNotEmpty()
     }
 
     private fun buildWhereClause(sql: String, routesFilter: RoutesFilter): Pair<String, MapSqlParameterSource> {

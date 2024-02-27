@@ -1,8 +1,10 @@
 package com.itmo.blss.api
 
+import com.itmo.blss.api.response.TicketDto
 import com.itmo.blss.api.response.TicketResponse
 import com.itmo.blss.model.TicketFilter
 import com.itmo.blss.model.UserInfoDto
+import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.service.TicketService
 import com.itmo.blss.utils.ApiConstraints.Companion.TICKET_IDS_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.USER_ID_KEY
@@ -26,7 +28,19 @@ class TicketsController(
         @RequestBody
         userInfoDto: UserInfoDto
     ): TicketResponse {
-        return TicketResponse.new(ticketService.createTicket(userId, userInfoDto))
+        ticketService.getTicketsInfoByFilter(TicketFilter(userId)).firstOrNull()?.ticket?.let {
+            if (compareTicketData(it, userInfoDto)) {
+                return TicketResponse(TicketDto.new(it), "Ticket already exist")
+            }
+        }
+        return try {
+            TicketResponse(
+                TicketDto.new(ticketService.createTicket(userId, userInfoDto)),
+                "Ticket was created"
+            )
+        } catch (e: RuntimeException) {
+            TicketResponse(null, e.message)
+        }
     }
 
     @GetMapping
@@ -35,10 +49,17 @@ class TicketsController(
         userId: Long?,
         @RequestParam(value = TICKET_IDS_KEY)
         ticketIds: List<Long>?
-    ): List<TicketResponse> {
+    ): List<TicketDto> {
         return ticketService.getTicketsInfoByFilter(
             TicketFilter(userId = userId, ticketIds = ticketIds)
         )
-            .map { TicketResponse.new(it) }
+            .map { TicketDto.new(it) }
+    }
+
+    private fun compareTicketData(ticket: Ticket, userInfoDto: UserInfoDto): Boolean {
+       return ticket.routeId == userInfoDto.routeId &&
+           ticket.trainId == userInfoDto.trainId &&
+           ticket.vanId == userInfoDto.vanId &&
+           ticket.seatId == userInfoDto.seatId
     }
 }

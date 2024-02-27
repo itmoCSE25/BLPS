@@ -4,13 +4,17 @@ VALUES ('Alex123', 'alex123@example.com', '123-456-7890', 'pass1234', NOW(), NOW
 
 INSERT INTO stations (name)
 VALUES ('Central Station'),
-       ('East Station');
+       ('East Station'),
+       ('West Station'),
+       ('South Station');
 
 INSERT INTO routes (departure_station_id, arrival_station_id, departure_time, arrival_time)
-VALUES (1, 2, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00');
+VALUES (1, 2, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00'),
+       (5, 6, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00' );
 
 INSERT INTO trains (train_num, route_id)
-VALUES (101, 1);
+VALUES (101, 1),
+       (110, 2);
 
 
 INSERT INTO vans (train_id, van_type, van_num)

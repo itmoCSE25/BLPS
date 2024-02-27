@@ -9,7 +9,6 @@ import com.itmo.blss.utils.TICKET_MAPPER
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
-import java.lang.RuntimeException
 import java.lang.StringBuilder
 
 @Service
@@ -25,7 +24,7 @@ class TicketDbServiceImpl(
             returning *
         """.trimIndent()
 
-        return namedParameterJdbcTemplate.query(
+        return namedParameterJdbcTemplate.queryForObject(
             sql, MapSqlParameterSource()
                 .addValue("userId", dbTicket.userId)
                 .addValue("name", dbTicket.name)
@@ -35,7 +34,7 @@ class TicketDbServiceImpl(
                 .addValue("vanId", dbTicket.vanId)
                 .addValue("seatId", dbTicket.seatId),
             TICKET_MAPPER
-        ).firstOrNull() ?: throw RuntimeException()
+        )!!
     }
 
     override fun getTicketsInfoByFilter(ticketFilter: TicketFilter): List<TicketInfo> {
