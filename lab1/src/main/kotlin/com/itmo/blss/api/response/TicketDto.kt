@@ -2,7 +2,6 @@ package com.itmo.blss.api.response
 
 import com.itmo.blss.model.TicketInfo
 import com.itmo.blss.model.db.Ticket
-import com.itmo.blss.model.enums.TransactionStatus
 
 data class TicketDto(
     val userId: Long,
@@ -12,8 +11,6 @@ data class TicketDto(
     val trainId: Long,
     val vanId: Long,
     val seatId: Long,
-    val transactionId: Long? = null,
-    val transactionStatus: TransactionStatus? = null,
 ) {
     companion object {
         fun new(ticket: Ticket) = TicketDto(
@@ -33,9 +30,7 @@ data class TicketDto(
             ticketInfo.ticket.routeId,
             ticketInfo.ticket.trainId,
             ticketInfo.ticket.vanId,
-            ticketInfo.ticket.seatId,
-            ticketInfo.receipt.transactionId,
-            ticketInfo.receipt.transactionStatus
+            ticketInfo.ticket.seatId
         )
     }
 }

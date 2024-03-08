@@ -10,19 +10,20 @@ VALUES ('Central Station'),
 
 INSERT INTO routes (departure_station_id, arrival_station_id, departure_time, arrival_time)
 VALUES (1, 2, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00'),
-       (5, 6, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00' );
+       (3, 4, '2023-05-01 08:00:00+00', '2023-05-01 10:00:00+00');
 
 INSERT INTO trains (train_num, route_id)
-VALUES (101, 1),
-       (110, 2);
+VALUES (101, 5),
+       (110, 6);
 
 
 INSERT INTO vans (train_id, van_type, van_num)
-VALUES (1, 2, 1);
+VALUES (3, 2, 1),
+       (4, 1, 12);
 
 
 INSERT INTO seats (van_id)
-VALUES (1);
+VALUES (2), (3), (3);
 
 -- INSERT INTO tickets (user_id, name, surname, route_id, train_id, van_id, seat_id, transaction_status, transaction_id)
 -- VALUES (1, 'Alex', 'Johnson', 1, 1, 1, 1, 0, 111);

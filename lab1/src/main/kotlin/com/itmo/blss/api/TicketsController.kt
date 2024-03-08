@@ -1,6 +1,8 @@
 package com.itmo.blss.api
 
+import com.itmo.blss.api.response.ReceiptDto
 import com.itmo.blss.api.response.TicketDto
+import com.itmo.blss.api.response.TicketFullInfoResponse
 import com.itmo.blss.api.response.TicketResponse
 import com.itmo.blss.model.TicketFilter
 import com.itmo.blss.model.UserInfoDto
@@ -49,17 +51,21 @@ class TicketsController(
         userId: Long?,
         @RequestParam(value = TICKET_IDS_KEY)
         ticketIds: List<Long>?
-    ): List<TicketDto> {
+    ): List<TicketFullInfoResponse> {
         return ticketService.getTicketsInfoByFilter(
             TicketFilter(userId = userId, ticketIds = ticketIds)
         )
-            .map { TicketDto.new(it) }
+            .map {
+                TicketFullInfoResponse(
+                    TicketDto.new(it.ticket), ReceiptDto.new(it.receipt)
+                )
+            }
     }
 
     private fun compareTicketData(ticket: Ticket, userInfoDto: UserInfoDto): Boolean {
-       return ticket.routeId == userInfoDto.routeId &&
-           ticket.trainId == userInfoDto.trainId &&
-           ticket.vanId == userInfoDto.vanId &&
-           ticket.seatId == userInfoDto.seatId
+        return ticket.routeId == userInfoDto.routeId &&
+            ticket.trainId == userInfoDto.trainId &&
+            ticket.vanId == userInfoDto.vanId &&
+            ticket.seatId == userInfoDto.seatId
     }
 }
