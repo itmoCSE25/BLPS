@@ -64,7 +64,7 @@ class JaasLoginModule : LoginModule {
     }
 
     override fun commit(): Boolean {
-        userPrincipal = UserPrincipal(login)
+        userPrincipal = UserPrincipal(login!!)
         subject!!.principals.add(userPrincipal)
         if (userGroups != null && userGroups!!.size > 0) {
             for (groupName in userGroups!!) {
