@@ -1,6 +1,6 @@
 package com.itmo.blss.model
 
-data class UserInfoDto(
+data class UserTicketInfo(
     val name: String,
     val surname: String,
     val birthday: String,

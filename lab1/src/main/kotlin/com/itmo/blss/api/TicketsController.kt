@@ -2,10 +2,10 @@ package com.itmo.blss.api
 
 import com.itmo.blss.api.response.ReceiptDto
 import com.itmo.blss.api.response.TicketDto
-import com.itmo.blss.api.response.TicketFullInfoResponse
+import com.itmo.blss.api.response.TicketFullInfoDto
 import com.itmo.blss.api.response.TicketResponse
 import com.itmo.blss.model.TicketFilter
-import com.itmo.blss.model.UserInfoDto
+import com.itmo.blss.model.UserTicketInfo
 import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.service.TicketService
 import com.itmo.blss.utils.ApiConstraints.Companion.TICKET_IDS_KEY
@@ -28,7 +28,7 @@ class TicketsController(
         @RequestParam(value = USER_ID_KEY)
         userId: Long,
         @RequestBody
-        userInfoDto: UserInfoDto
+        userInfoDto: UserTicketInfo
     ): TicketResponse {
         ticketService.getTicketsInfoByFilter(TicketFilter(userId)).firstOrNull()?.ticket?.let {
             if (compareTicketData(it, userInfoDto)) {
@@ -51,18 +51,18 @@ class TicketsController(
         userId: Long?,
         @RequestParam(value = TICKET_IDS_KEY)
         ticketIds: List<Long>?
-    ): List<TicketFullInfoResponse> {
+    ): List<TicketFullInfoDto> {
         return ticketService.getTicketsInfoByFilter(
             TicketFilter(userId = userId, ticketIds = ticketIds)
         )
             .map {
-                TicketFullInfoResponse(
+                TicketFullInfoDto(
                     TicketDto.new(it.ticket), ReceiptDto.new(it.receipt)
                 )
             }
     }
 
-    private fun compareTicketData(ticket: Ticket, userInfoDto: UserInfoDto): Boolean {
+    private fun compareTicketData(ticket: Ticket, userInfoDto: UserTicketInfo): Boolean {
         return ticket.routeId == userInfoDto.routeId &&
             ticket.trainId == userInfoDto.trainId &&
             ticket.vanId == userInfoDto.vanId &&

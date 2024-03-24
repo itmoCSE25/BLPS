@@ -1,6 +1,6 @@
 package com.itmo.blss.api
 
-import com.itmo.blss.api.response.TrainResponse
+import com.itmo.blss.api.response.TrainDto
 import com.itmo.blss.model.db.Train
 import com.itmo.blss.service.TrainsDbService
 import com.itmo.blss.utils.ApiConstraints.Companion.ROUTE_ID_KEY
@@ -19,12 +19,12 @@ class TrainsController(
     fun getTrains(
         @RequestParam(value = ROUTE_ID_KEY)
         routeId: Int
-    ): List<TrainResponse> {
+    ): List<TrainDto> {
         return trainsDbService.getTrains(routeId)
             .map { it.toTrainResponse() }
     }
 
-    private fun Train.toTrainResponse() = TrainResponse(
+    private fun Train.toTrainResponse() = TrainDto(
         this.trainId,
         this.trainNum
     )

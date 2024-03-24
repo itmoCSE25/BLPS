@@ -1,6 +1,6 @@
 package com.itmo.blss.api
 
-import com.itmo.blss.api.response.RouteResponse
+import com.itmo.blss.api.response.RouteDto
 import com.itmo.blss.model.RoutesFilter
 import com.itmo.blss.model.db.Route
 import com.itmo.blss.service.RoutesDbService
@@ -30,7 +30,7 @@ class RoutesController(
         departureTime: Instant?,
         @RequestParam(value = DEPARTURE_STATION_KEY)
         departureStation: String?
-    ): List<RouteResponse> {
+    ): List<RouteDto> {
         return routesDbService.getRoutesWithFilter(
             RoutesFilter(
                 arrivalTime = arrivalTime,
@@ -42,7 +42,7 @@ class RoutesController(
             .map { it.toRouteResponse() }
     }
 
-    private fun Route.toRouteResponse() = RouteResponse(
+    private fun Route.toRouteResponse() = RouteDto(
         this.routeId,
         this.arrivalTime.toString(),
         this.departureTime.toString(),

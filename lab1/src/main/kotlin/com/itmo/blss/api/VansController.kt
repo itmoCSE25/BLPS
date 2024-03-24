@@ -1,6 +1,6 @@
 package com.itmo.blss.api
 
-import com.itmo.blss.api.response.VanResponse
+import com.itmo.blss.api.response.VanDto
 import com.itmo.blss.model.db.Van
 import com.itmo.blss.service.VansDbService
 import com.itmo.blss.utils.ApiConstraints.Companion.TRAIN_ID_KEY
@@ -19,12 +19,12 @@ class VansController(
     fun getVans(
         @RequestParam(value = TRAIN_ID_KEY)
         trainId: Long
-    ): List<VanResponse> {
+    ): List<VanDto> {
         return vansDbService.getVansByTrainId(trainId)
             .map { it.toVanResponse() }
     }
 
-    private fun Van.toVanResponse() = VanResponse(
+    private fun Van.toVanResponse() = VanDto(
         vanId = this.vanId,
         vanType = this.vanType,
         trainId = this.trainId

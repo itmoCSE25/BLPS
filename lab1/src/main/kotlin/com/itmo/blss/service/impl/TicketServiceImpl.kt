@@ -2,7 +2,7 @@ package com.itmo.blss.service.impl
 
 import com.itmo.blss.model.TicketFilter
 import com.itmo.blss.model.TicketInfo
-import com.itmo.blss.model.UserInfoDto
+import com.itmo.blss.model.UserTicketInfo
 import com.itmo.blss.model.db.Receipt
 import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.service.BillingService
@@ -29,7 +29,7 @@ class TicketServiceImpl(
     private val routesDbService: RoutesDbService
 ) : TicketService {
 
-    override fun createTicket(userId: Long, userInfoDto: UserInfoDto): Ticket {
+    override fun createTicket(userId: Long, userInfoDto: UserTicketInfo): Ticket {
         checkUserInfoDto(userInfoDto)
         return transactionTemplate.execute {
             val ticket = ticketDbService.saveTicketInfo(userInfoDto.toDbTicket(userId))
@@ -50,7 +50,7 @@ class TicketServiceImpl(
         return ticketDbService.getTicketsInfoByFilter(ticketFilter)
     }
 
-    private fun UserInfoDto.toDbTicket(userId: Long) = Ticket(
+    private fun UserTicketInfo.toDbTicket(userId: Long) = Ticket(
         userId = userId,
         name = this.name,
         surname = this.surname,
@@ -60,7 +60,7 @@ class TicketServiceImpl(
         seatId = this.seatId
     )
 
-    private fun checkUserInfoDto(userInfoDto: UserInfoDto) {
+    private fun checkUserInfoDto(userInfoDto: UserTicketInfo) {
         with(userInfoDto) {
             if (!routesDbService.isRouteExist(routeId)) {
                 throw RuntimeException("Route with id $routeId is not exist")

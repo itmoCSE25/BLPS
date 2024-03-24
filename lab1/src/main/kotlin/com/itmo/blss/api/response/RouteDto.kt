@@ -1,6 +1,6 @@
 package com.itmo.blss.api.response
 
-data class RouteResponse(
+data class RouteDto(
     val routeId: Long,
     val arrivalTime: String,
     val departureTime: String,

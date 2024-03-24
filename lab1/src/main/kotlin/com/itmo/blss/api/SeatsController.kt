@@ -1,6 +1,6 @@
 package com.itmo.blss.api
 
-import com.itmo.blss.api.response.SeatResponse
+import com.itmo.blss.api.response.SeatDto
 import com.itmo.blss.model.db.Seat
 import com.itmo.blss.service.SeatsDbService
 import com.itmo.blss.utils.ApiConstraints.Companion.VAN_ID_KEY
@@ -19,12 +19,12 @@ class SeatsController(
     fun getSeatsWithFilter(
         @RequestParam(value = VAN_ID_KEY)
         vanId: Long
-    ): List<SeatResponse> {
+    ): List<SeatDto> {
         return seatsDbService.getSeatsByVanId(vanId)
             .map { it.toSeatResponse() }
     }
 
-    private fun Seat.toSeatResponse() = SeatResponse(
+    private fun Seat.toSeatResponse() = SeatDto(
         vanId = this.vanId,
         seatId = this.seatId
     )
