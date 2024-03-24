@@ -1,82 +1,62 @@
-package com.itmo.blss.model.jaas;
+package com.itmo.blss.model.jaas
 
-import java.util.Collection;
-import java.util.List;
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+class User : UserDetails {
+    var id: Long? = null
+        private set
+    private var username: String? = null
+    private var password: String? = null
+    var role: Role? = null
+        private set
 
-public class User implements UserDetails {
-
-    private Long id;
-
-    private String username;
-
-    private String password;
-
-    private Role role;
-
-    public Long getId() {
-        return id;
+    fun setId(id: Long?): User {
+        this.id = id
+        return this
     }
 
-    public User setId(Long id) {
-        this.id = id;
-        return this;
+    override fun getUsername(): String {
+        return username!!
     }
 
-    @Override
-    public String getUsername() {
-        return username;
+    override fun isAccountNonExpired(): Boolean {
+        return true
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    override fun isAccountNonLocked(): Boolean {
+        return true
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    override fun isCredentialsNonExpired(): Boolean {
+        return true
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
+    override fun isEnabled(): Boolean {
+        return true
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
+    fun setUsername(username: String?): User {
+        this.username = username
+        return this
     }
 
-    public User setUsername(String username) {
-        this.username = username;
-        return this;
+    override fun getAuthorities(): Collection<GrantedAuthority?> {
+        return listOf(SimpleGrantedAuthority(role!!.name))
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+    override fun getPassword(): String {
+        return password!!
     }
 
-    @Override
-    public String getPassword() {
-        return password;
+    fun setPassword(password: String?): User {
+        this.password = password
+        return this
     }
 
-    public User setPassword(String password) {
-        this.password = password;
-        return this;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public User setRole(Role role) {
-        this.role = role;
-        return this;
+    fun setRole(role: Role?): User {
+        this.role = role
+        return this
     }
 }

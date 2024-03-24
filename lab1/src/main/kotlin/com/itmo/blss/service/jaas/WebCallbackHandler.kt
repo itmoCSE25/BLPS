@@ -1,25 +1,21 @@
-package com.itmo.blss.service.jaas;
+package com.itmo.blss.service.jaas
 
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-
-import org.springframework.security.authentication.jaas.JaasAuthenticationCallbackHandler;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.jaas.JaasAuthenticationCallbackHandler
+import org.springframework.security.core.Authentication
+import org.springframework.stereotype.Service
+import javax.security.auth.callback.Callback
+import javax.security.auth.callback.NameCallback
+import javax.security.auth.callback.PasswordCallback
+import javax.security.auth.callback.UnsupportedCallbackException
 
 @Service
-public class WebCallbackHandler implements JaasAuthenticationCallbackHandler {
+class WebCallbackHandler : JaasAuthenticationCallbackHandler {
 
-    @Override
-    public void handle(Callback callback, Authentication auth) throws UnsupportedCallbackException {
-        if (callback instanceof NameCallback nameCallback) {
-            nameCallback.setName(auth.getName());
-        } else if (callback instanceof PasswordCallback passwordCallback) {
-            passwordCallback.setPassword(((String) auth.getCredentials()).toCharArray());
-        } else {
-            throw new UnsupportedCallbackException(callback, "The submitted Callback is unsupported");
+    override fun handle(callback: Callback, auth: Authentication) {
+        when (callback) {
+            is NameCallback -> callback.name = auth.name
+            is PasswordCallback -> callback.password = (auth.credentials as String).toCharArray()
+            else -> throw UnsupportedCallbackException(callback, "The submitted Callback is unsupported")
         }
     }
 }

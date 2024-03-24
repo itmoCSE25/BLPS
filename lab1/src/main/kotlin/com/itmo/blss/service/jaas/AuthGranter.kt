@@ -1,15 +1,12 @@
-package com.itmo.blss.service.jaas;
+package com.itmo.blss.service.jaas
 
-import java.security.Principal;
-import java.util.Set;
-
-import org.springframework.security.authentication.jaas.AuthorityGranter;
-import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.jaas.AuthorityGranter
+import org.springframework.stereotype.Service
+import java.security.Principal
 
 @Service
-public class AuthGranter implements AuthorityGranter {
-    @Override
-    public Set<String> grant(Principal principal) {
-        return Set.of(principal.getName());
+class AuthGranter : AuthorityGranter {
+    override fun grant(principal: Principal): Set<String> {
+        return java.util.Set.of(principal.name)
     }
 }

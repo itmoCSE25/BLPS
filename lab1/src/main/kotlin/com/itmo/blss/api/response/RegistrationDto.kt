@@ -1,6 +1,5 @@
-package com.itmo.blss.api.response;
+package com.itmo.blss.api.response
 
-import com.itmo.blss.model.jaas.Role;
+import com.itmo.blss.model.jaas.Role
 
-public record RegistrationDto(String username, String password, Role role) {
-}
+data class RegistrationDto(@JvmField val username: String, @JvmField val password: String, @JvmField val role: Role)

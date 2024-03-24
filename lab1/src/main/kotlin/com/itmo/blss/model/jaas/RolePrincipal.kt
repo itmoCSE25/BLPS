@@ -1,20 +1,15 @@
-package com.itmo.blss.model.jaas;
+package com.itmo.blss.model.jaas
 
-import java.security.Principal;
+import java.security.Principal
+import javax.security.auth.Subject
 
-import javax.security.auth.Subject;
-
-public record RolePrincipal(
-        String name
-) implements Principal {
-
-    @Override
-    public String getName() {
-        return name;
+@JvmRecord
+data class RolePrincipal(val name: String) : Principal {
+    override fun getName(): String {
+        return name
     }
 
-    @Override
-    public boolean implies(Subject subject) {
-        return Principal.super.implies(subject);
+    override fun implies(subject: Subject): Boolean {
+        return super<Principal>.implies(subject)
     }
 }

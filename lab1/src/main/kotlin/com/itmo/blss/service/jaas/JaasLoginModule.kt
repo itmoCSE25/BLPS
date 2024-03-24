@@ -1,94 +1,87 @@
-package com.itmo.blss.service.jaas;
+package com.itmo.blss.service.jaas
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
+import com.itmo.blss.model.jaas.RolePrincipal
+import com.itmo.blss.model.jaas.UserPrincipal
+import com.itmo.blss.service.UserDbService
+import org.springframework.security.crypto.password.PasswordEncoder
+import java.io.IOException
+import javax.security.auth.Subject
+import javax.security.auth.callback.Callback
+import javax.security.auth.callback.CallbackHandler
+import javax.security.auth.callback.NameCallback
+import javax.security.auth.callback.PasswordCallback
+import javax.security.auth.callback.UnsupportedCallbackException
+import javax.security.auth.login.LoginException
+import javax.security.auth.spi.LoginModule
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.spi.LoginModule;
-
-import com.itmo.blss.model.jaas.RolePrincipal;
-import com.itmo.blss.model.jaas.User;
-import com.itmo.blss.model.jaas.UserPrincipal;
-import com.itmo.blss.service.UserDbService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-@SuppressWarnings("unused")
-public class JaasLoginModule implements LoginModule {
-
-    private UserDbService userService;
-    private PasswordEncoder passwordEncoder;
-    private CallbackHandler handler;
-    private Subject subject;
-    private ArrayList<String> userGroups;
-    private String login;
-    private UserPrincipal userPrincipal;
-    private RolePrincipal rolePrincipal;
-
-    @Override
-    public void initialize(Subject subject,
-                           CallbackHandler callbackHandler,
-                           Map<String, ?> sharedState,
-                           Map<String, ?> options) {
-        handler = callbackHandler;
-        this.subject = subject;
-        this.userService = (UserDbService) options.get("userService");
-        this.passwordEncoder = (PasswordEncoder) options.get("passwordEncoder");
+@Suppress("unused")
+class JaasLoginModule : LoginModule {
+    private var userService: UserDbService? = null
+    private var passwordEncoder: PasswordEncoder? = null
+    private var handler: CallbackHandler? = null
+    private var subject: Subject? = null
+    private var userGroups: ArrayList<String>? = null
+    private var login: String? = null
+    private var userPrincipal: UserPrincipal? = null
+    private var rolePrincipal: RolePrincipal? = null
+    override fun initialize(
+        subject: Subject,
+        callbackHandler: CallbackHandler,
+        sharedState: Map<String?, *>?,
+        options: Map<String?, *>
+    ) {
+        handler = callbackHandler
+        this.subject = subject
+        userService = options["userService"] as UserDbService?
+        passwordEncoder = options["passwordEncoder"] as PasswordEncoder?
     }
 
-    @Override
-    public boolean login() throws LoginException {
+    @Throws(LoginException::class)
+    override fun login(): Boolean {
         // Добавляем колбэки
-        Callback[] callbacks = new Callback[2];
-        callbacks[0] = new NameCallback("Username");
-        callbacks[1] = new PasswordCallback("Password", true);
+        val callbacks = arrayOfNulls<Callback>(2)
+        callbacks[0] = NameCallback("Username")
+        callbacks[1] = PasswordCallback("Password", true)
         // При помощи колбэков получаем через CallbackHandler логин и пароль
-        try {
-            handler.handle(callbacks);
-            String name = ((NameCallback) callbacks[0]).getName();
-            String password = String.valueOf(((PasswordCallback) callbacks[1]).getPassword());
-            User user = userService.getByUsername(name);
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                login = name;
-                userGroups = new ArrayList<>();
-                userGroups.add(user.getRole().toString());
-                return true;
+        return try {
+            handler!!.handle(callbacks)
+            val name = (callbacks[0] as NameCallback?)!!.name
+            val password = String((callbacks[1] as PasswordCallback?)!!.password)
+            val user = userService!!.getByUsername(name)
+            if (passwordEncoder!!.matches(password, user.password)) {
+                login = name
+                userGroups = ArrayList()
+                userGroups!!.add(user.role.toString())
+                true
             } else {
-                throw new LoginException("Invalid credentials for user: %s");
+                throw LoginException("Invalid credentials for user: %s")
             }
-        } catch (IOException | UnsupportedCallbackException e) {
-            throw new LoginException(e.getMessage());
+        } catch (e: IOException) {
+            throw LoginException(e.message)
+        } catch (e: UnsupportedCallbackException) {
+            throw LoginException(e.message)
         }
     }
 
-    @Override
-    public boolean commit() {
-        userPrincipal = new UserPrincipal(login);
-        subject.getPrincipals().add(userPrincipal);
-        if (userGroups != null && userGroups.size() > 0) {
-            for (String groupName : userGroups) {
-                rolePrincipal = new RolePrincipal(groupName);
-                subject.getPrincipals().add(rolePrincipal);
+    override fun commit(): Boolean {
+        userPrincipal = UserPrincipal(login)
+        subject!!.principals.add(userPrincipal)
+        if (userGroups != null && userGroups!!.size > 0) {
+            for (groupName in userGroups!!) {
+                rolePrincipal = RolePrincipal(groupName)
+                subject!!.principals.add(rolePrincipal)
             }
         }
-        return true;
+        return true
     }
 
-    @Override
-    public boolean abort() {
-        return false;
+    override fun abort(): Boolean {
+        return false
     }
 
-    @Override
-    public boolean logout() {
-        subject.getPrincipals().remove(userPrincipal);
-        subject.getPrincipals().remove(rolePrincipal);
-        return true;
+    override fun logout(): Boolean {
+        subject!!.principals.remove(userPrincipal)
+        subject!!.principals.remove(rolePrincipal)
+        return true
     }
 }
