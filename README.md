@@ -20,3 +20,15 @@
 - [x] Получение информации о платеже, проверка состояния платежа, сохранение состояния платежа
 - [ ] Получение билета и сохранение вместе с чеком. Предоставление электронного билета
 - [ ] Отправка билета на почту и в смс
+
+
+Kafka
+https://dlcdn.apache.org/kafka/3.7.0/kafka_2.13-3.7.0.tgz
+1.скачать кафку и добавить в корень проекта
+2.в разных окнах терминала запустить команды:
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh config/server.properties
+
+для просмотра сообщений:
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic billing-transactions --from-beginning
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic billing-errors --from-beginning
