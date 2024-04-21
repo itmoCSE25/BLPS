@@ -8,7 +8,10 @@ import org.springframework.jdbc.core.SingleColumnRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.lang.StringBuilder
+import java.sql.Timestamp
 
 @Service
 class RoutesDbService(
@@ -48,6 +51,25 @@ class RoutesDbService(
             MapSqlParameterSource("routeId", routeId),
             SingleColumnRowMapper.newInstance(Long::class.java)
         ).isNotEmpty()
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun crateRoute(route: Route) {
+        val sql = """
+            insert into routes (departure_station_id, arrival_station_id, departure_time, arrival_time)
+            values (:departureStation, :arrivalStation, :departureTime, :arrivalTime)
+        """.trimIndent()
+
+        with(route) {
+            namedParameterJdbcTemplate.update(
+                sql,
+                MapSqlParameterSource()
+                    .addValue("departureStation", departureStationId!!)
+                    .addValue("arrivalStation", arrivalStationId!!)
+                    .addValue("departureTime", Timestamp.from(departureTime))
+                    .addValue("arrivalTime", Timestamp.from(arrivalTime))
+            )
+        }
     }
 
     private fun buildWhereClause(sql: String, routesFilter: RoutesFilter): Pair<String, MapSqlParameterSource> {

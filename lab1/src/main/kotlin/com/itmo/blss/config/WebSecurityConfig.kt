@@ -12,6 +12,7 @@ import org.springframework.security.authentication.jaas.DefaultJaasAuthenticatio
 import org.springframework.security.authentication.jaas.JaasAuthenticationCallbackHandler
 import org.springframework.security.authentication.jaas.memory.InMemoryConfiguration
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -21,6 +22,11 @@ import javax.security.auth.login.AppConfigurationEntry
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(
+    prePostEnabled = true,
+    securedEnabled = true,
+    jsr250Enabled = true,
+)
 class WebSecurityConfig(
     private val userService: UserDbService,
     private val authorityGranter: AuthorityGranter,
@@ -37,9 +43,6 @@ class WebSecurityConfig(
             .csrf { it.disable() }
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/api/seats").hasAuthority(Role.ROLE_USER.toString())
-                    .requestMatchers("/api/vans").hasAuthority(Role.ROLE_ADMIN.toString())
-                    .requestMatchers("/api/**").permitAll()
                     .anyRequest().permitAll()
 
             }

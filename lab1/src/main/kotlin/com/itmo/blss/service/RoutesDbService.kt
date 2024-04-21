@@ -8,4 +8,6 @@ interface RoutesDbService {
     fun getRoutesWithFilter(routesFilter: RoutesFilter): List<Route>
 
     fun isRouteExist(routeId: Long): Boolean
+
+    fun crateRoute(route: Route)
 }

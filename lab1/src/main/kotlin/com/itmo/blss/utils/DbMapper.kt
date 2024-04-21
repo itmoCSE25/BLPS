@@ -4,6 +4,7 @@ import com.itmo.blss.model.TicketInfo
 import com.itmo.blss.model.db.Receipt
 import com.itmo.blss.model.db.Route
 import com.itmo.blss.model.db.Seat
+import com.itmo.blss.model.db.Station
 import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.model.db.Train
 import com.itmo.blss.model.db.Van
@@ -25,7 +26,8 @@ val ROUTE_MAPPER = RowMapper { rs, _: Int ->
 val TRAIN_MAPPER = RowMapper { rs, _ ->
     Train(
         trainId = rs.getLong("id"),
-        trainNum = rs.getInt("train_num")
+        trainNum = rs.getLong("train_num"),
+        routeId = rs.getLong("routeId")
     )
 }
 
@@ -33,7 +35,8 @@ val VAN_MAPPER = RowMapper { rs, _ ->
     Van(
         vanId = rs.getLong("id"),
         vanType = VanType.from(rs.getInt("van_type")) ?: VanType.UNDEFINED,
-        trainId = rs.getLong("train_id")
+        trainId = rs.getLong("train_id"),
+        vanNum = rs.getLong("van_num")
     )
 }
 
@@ -57,6 +60,13 @@ val TICKET_INFO_MAPPER = RowMapper { rs, _ ->
             transactionId = rs.getLong("transaction_id"),
             transactionStatus = TransactionStatus.from(rs.getInt("transaction_status")) ?: TransactionStatus.UNDEFINED
         )
+    )
+}
+
+val STATION_MAPPER = RowMapper { rs, _ ->
+    Station(
+        id = rs.getLong("id"),
+        name = rs.getString("name")
     )
 }
 

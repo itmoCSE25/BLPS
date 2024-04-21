@@ -10,6 +10,7 @@ import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.service.TicketService
 import com.itmo.blss.utils.ApiConstraints.Companion.TICKET_IDS_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.USER_ID_KEY
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,20 +30,20 @@ class TicketsController(
         userId: Long,
         @RequestBody
         userInfoDto: UserTicketInfo
-    ): TicketResponse {
+    ): ResponseEntity<TicketResponse> {
         ticketService.getTicketsInfoByFilter(TicketFilter(userId)).firstOrNull()?.ticket?.let {
             if (compareTicketData(it, userInfoDto)) {
-                return TicketResponse(TicketDto.new(it), "Ticket already exist")
+                return ResponseEntity.ok(
+                    TicketResponse(TicketDto.new(it), "Ticket already exist")
+                )
             }
         }
-        return try {
+        return ResponseEntity.ok(
             TicketResponse(
                 TicketDto.new(ticketService.createTicket(userId, userInfoDto)),
                 "Ticket was created"
             )
-        } catch (e: RuntimeException) {
-            TicketResponse(null, e.message)
-        }
+        )
     }
 
     @GetMapping
@@ -51,8 +52,8 @@ class TicketsController(
         userId: Long?,
         @RequestParam(value = TICKET_IDS_KEY)
         ticketIds: List<Long>?
-    ): List<TicketFullInfoDto> {
-        return ticketService.getTicketsInfoByFilter(
+    ): ResponseEntity<List<TicketFullInfoDto>> {
+        val res = ticketService.getTicketsInfoByFilter(
             TicketFilter(userId = userId, ticketIds = ticketIds)
         )
             .map {
@@ -60,6 +61,7 @@ class TicketsController(
                     TicketDto.new(it.ticket), ReceiptDto.new(it.receipt)
                 )
             }
+        return ResponseEntity.ok(res)
     }
 
     private fun compareTicketData(ticket: Ticket, userInfoDto: UserTicketInfo): Boolean {

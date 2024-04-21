@@ -23,12 +23,22 @@ VALUES (3, 2, 1),
 
 
 INSERT INTO seats (van_id)
-VALUES (2), (3), (3);
+VALUES (2),
+       (3),
+       (3);
 
--- INSERT INTO tickets (user_id, name, surname, route_id, train_id, van_id, seat_id, transaction_status, transaction_id)
--- VALUES (1, 'Alex', 'Johnson', 1, 1, 1, 1, 0, 111);
+create table users
+(
+    id       serial primary key,
+    username text not null,
+    password text not null,
+    role     text not null
+);
 
-
+alter table stations add unique (name);
+alter table routes add unique (departure_station_id, arrival_station_id);
+alter table vans add unique (train_id, van_num);
+alter table trains add unique (train_num, route_id);
 
 
 

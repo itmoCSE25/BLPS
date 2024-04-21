@@ -14,6 +14,7 @@ import com.itmo.blss.service.TicketService
 import com.itmo.blss.service.TrainsDbService
 import com.itmo.blss.service.VansDbService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import kotlin.RuntimeException
 
@@ -29,6 +30,7 @@ class TicketServiceImpl(
     private val routesDbService: RoutesDbService
 ) : TicketService {
 
+    @Transactional
     override fun createTicket(userId: Long, userInfoDto: UserTicketInfo): Ticket {
         checkUserInfoDto(userInfoDto)
         return transactionTemplate.execute {

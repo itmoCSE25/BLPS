@@ -6,6 +6,8 @@ import com.itmo.blss.utils.TRAIN_MAPPER
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TrainsDbServiceImpl(
@@ -22,5 +24,22 @@ class TrainsDbServiceImpl(
             MapSqlParameterSource("routeId", routeId),
             TRAIN_MAPPER
         )
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    override fun createTrain(train: Train) {
+        val sql = """
+            insert into trains (train_num, route_id)
+            values (:trainNum, :routeId)
+        """.trimIndent()
+
+        with(train) {
+            namedParameterJdbcTemplate.update(
+                sql,
+                MapSqlParameterSource()
+                    .addValue("trainNum", trainNum)
+                    .addValue("routeId", routeId)
+            )
+        }
     }
 }

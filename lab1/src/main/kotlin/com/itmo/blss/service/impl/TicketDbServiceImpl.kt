@@ -9,6 +9,8 @@ import com.itmo.blss.utils.TICKET_MAPPER
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.lang.StringBuilder
 
 @Service
@@ -16,6 +18,7 @@ class TicketDbServiceImpl(
     private val namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 ) : TicketDbService {
 
+    @Transactional(propagation = Propagation.MANDATORY)
     override fun saveTicketInfo(dbTicket: Ticket): Ticket {
         val sql = """
             insert into tickets (user_id, name, surname, route_id, train_id, van_id, seat_id) 
