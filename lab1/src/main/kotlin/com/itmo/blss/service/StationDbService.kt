@@ -11,4 +11,6 @@ interface StationDbService {
     fun isStationsExist(ids: List<Long>): Boolean
 
     fun createStation(station: Station)
+
+    fun upsertStations(stations: List<Station>)
 }

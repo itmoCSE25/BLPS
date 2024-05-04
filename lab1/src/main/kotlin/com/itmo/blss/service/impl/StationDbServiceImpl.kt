@@ -6,6 +6,7 @@ import com.itmo.blss.utils.STATION_MAPPER
 import org.springframework.jdbc.core.SingleColumnRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -64,5 +65,23 @@ class StationDbServiceImpl(
         } catch (e: Exception) {
             throw IllegalArgumentException("Bad sql request. Duplicated unique value")
         }
+    }
+
+    @Transactional
+    override fun upsertStations(stations: List<Station>) {
+        val updateSql = """
+            insert into stations (id, name)
+            values (:id, :name)
+            on conflict (id)
+            do update set
+            name = excluded.name
+        """.trimIndent()
+        namedParameterJdbcTemplate. batchUpdate(updateSql, SqlParameterSourceUtils.createBatch(stations))
+
+        val deleteSql = """
+            delete from stations
+            where id not in (:ids);
+        """.trimIndent()
+        namedParameterJdbcTemplate.update(deleteSql, MapSqlParameterSource("ids", stations.map { it.id }))
     }
 }

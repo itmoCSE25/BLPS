@@ -5,6 +5,7 @@ import com.itmo.blss.model.TicketInfo
 import com.itmo.blss.model.UserTicketInfo
 import com.itmo.blss.model.db.Receipt
 import com.itmo.blss.model.db.Ticket
+import com.itmo.blss.model.enums.TransactionStatus
 import com.itmo.blss.service.BillingService
 import com.itmo.blss.service.ReceiptDbService
 import com.itmo.blss.service.RoutesDbService
@@ -23,7 +24,7 @@ class TicketServiceImpl(
     private val ticketDbService: TicketDbService,
     private val receiptDbService: ReceiptDbService,
     private val transactionTemplate: TransactionTemplate,
-    private val billingService: BillingService,
+    private val billingClient: BillingService,
     private val seatsDbService: SeatsDbService,
     private val vansDbService: VansDbService,
     private val trainsDbService: TrainsDbService,
@@ -35,13 +36,15 @@ class TicketServiceImpl(
         checkUserInfoDto(userInfoDto)
         return transactionTemplate.execute {
             val ticket = ticketDbService.saveTicketInfo(userInfoDto.toDbTicket(userId))
-            val transaction = billingService.getInformationByTransaction()
+            billingClient.sendBillingInfo(
+                userId.toInt(), calculatePrice(userInfoDto).toDouble()
+            )
             receiptDbService.saveReceiptInfo(
                 Receipt(
                     userId = userId,
                     ticketId = ticket.ticketId,
-                    transactionId = transaction.first,
-                    transactionStatus = transaction.second
+                    transactionId = -1,
+                    transactionStatus = TransactionStatus.UNDEFINED
                 )
             )
             ticket
@@ -77,5 +80,9 @@ class TicketServiceImpl(
                 throw RuntimeException("Seat with id $seatId is not presented in van with id $vanId")
             }
         }
+    }
+
+    private fun calculatePrice(userInfoDto: UserTicketInfo): Long {
+        return userInfoDto.seatId * userInfoDto.vanId * userInfoDto.routeId
     }
 }
