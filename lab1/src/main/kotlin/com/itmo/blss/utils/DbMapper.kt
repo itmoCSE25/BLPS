@@ -27,7 +27,7 @@ val TRAIN_MAPPER = RowMapper { rs, _ ->
     Train(
         trainId = rs.getLong("id"),
         trainNum = rs.getLong("train_num"),
-        routeId = rs.getLong("routeId")
+        routeId = rs.getLong("route_id")
     )
 }
 

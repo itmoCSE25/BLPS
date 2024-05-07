@@ -13,4 +13,6 @@ interface StationDbService {
     fun createStation(station: Station)
 
     fun upsertStations(stations: List<Station>)
+
+    fun clearStations()
 }

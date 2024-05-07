@@ -1,6 +1,7 @@
 package com.itmo.blss.service.impl
 
 import com.itmo.blss.model.db.Receipt
+import com.itmo.blss.model.enums.TransactionStatus
 import com.itmo.blss.service.ReceiptDbService
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -26,5 +27,20 @@ class ReceiptDbServiceImpl(
                     .addValue("transactionStatus", transactionStatus.code)
             }
         ) > 0
+    }
+
+    override fun updateTransactionInfo(userId: Long, transactionStatus: TransactionStatus) {
+        val sql = """
+            update tickets set
+            transaction_status = :transactionStatus
+            where user_id = :userId
+        """.trimIndent()
+
+        namedParameterJdbcTemplate.update(
+            sql,
+            MapSqlParameterSource()
+                .addValue("userId", userId)
+                .addValue("transactionStatus", transactionStatus.code)
+        )
     }
 }

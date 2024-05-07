@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -16,11 +17,22 @@
 	<properties>
 		<java.version>17</java.version>
 		<kotlin.version>1.9.22</kotlin.version>
+		<atomikos-version>6.0.0</atomikos-version>
+		<spring-version>6.1.2</spring-version>
+		<hibernate.version>6.4.2.Final</hibernate.version>
+		<spring-data-jpa.version>3.2.2</spring-data-jpa.version>
+		<activemq-core.version>5.7.0</activemq-core.version>
+		<derby.version>10.8.1.2</derby.version>
+		<jta.version>1.1</jta.version>
+		<geronimo.version>1.0</geronimo.version>
+		<hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
+			<version>3.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -39,12 +51,6 @@
 			<artifactId>kotlin-stdlib</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -52,12 +58,8 @@
 			<version>42.6.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-jta-bitronix -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jta-bitronix</artifactId>
-			<version>2.4.13</version>
-		</dependency>
+<!--		Spring security -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -69,6 +71,8 @@
 			</exclusions>
 		</dependency>
 
+<!--		Apache kafka-->
+
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
@@ -79,11 +83,94 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.12.0</version>
 		</dependency>
+
+		<!-- Atomikos -->
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jdbc</artifactId>
+			<version>${atomikos-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jta</artifactId>
+			<version>${atomikos-version}</version>
+			<classifier>jakarta</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-jms</artifactId>
+			<version>${atomikos-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.atomikos</groupId>
+			<artifactId>transactions-hibernate4</artifactId>
+			<version>${atomikos-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<version>${spring-data-jpa.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring-version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.transaction</groupId>
+					<artifactId>jta</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>${activemq-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derby</artifactId>
+			<version>${derby.version}</version>
+		</dependency>
+		<!-- the JTA API -->
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>${jta.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jta_1.0.1B_spec</artifactId>
+			<version>${geronimo.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate-validator.version}</version>
+		</dependency>
 	</dependencies>
+
+
 
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -108,7 +195,15 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

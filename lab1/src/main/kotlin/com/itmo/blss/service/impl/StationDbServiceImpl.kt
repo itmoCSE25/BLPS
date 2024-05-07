@@ -77,11 +77,12 @@ class StationDbServiceImpl(
             name = excluded.name
         """.trimIndent()
         namedParameterJdbcTemplate. batchUpdate(updateSql, SqlParameterSourceUtils.createBatch(stations))
+    }
 
-        val deleteSql = """
-            delete from stations
-            where id not in (:ids);
-        """.trimIndent()
-        namedParameterJdbcTemplate.update(deleteSql, MapSqlParameterSource("ids", stations.map { it.id }))
+    override fun clearStations() {
+        namedParameterJdbcTemplate.update(
+            "delete from stations where true",
+            MapSqlParameterSource()
+        )
     }
 }

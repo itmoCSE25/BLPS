@@ -16,15 +16,13 @@ public class ConsumerMessageService {
 
     private final MessageSenderService messageSenderService;
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
-
     public ConsumerMessageService(KafkaConsumer<String, String> consumer, MessageSenderService messageSenderService) {
         this.consumer = consumer;
         this.messageSenderService = messageSenderService;
     }
 
     public void startConsumer() {
-        executorService.execute(this::acceptMessages);
+        acceptMessages();
     }
 
     private void acceptMessages() {
@@ -40,7 +38,7 @@ public class ConsumerMessageService {
             }
 
         } catch (Exception e) {
-            System.out.println("Exception occured: " + e);
+            System.out.println("Exception occurred: " + e);
         } finally {
             consumer.close(); // this will also commit the offsets if need be.
             System.out.println("The consumer is now gracefully closed.");

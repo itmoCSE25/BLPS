@@ -12,6 +12,30 @@ services:
     ports:
       - "5432:5432"
 
+  billing-postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "billing"
+      POSTGRES_USER: "blps"
+      POSTGRES_PASSWORD: "blps"
+      PGDATA: "/var/lib/postgresql/data/billing"
+    volumes:
+      - ~/docker/postgres/billing/data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  master-db:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "master"
+      POSTGRES_USER: "blps"
+      POSTGRES_PASSWORD: "blps"
+      PGDATA: "/var/lib/postgresql/data/master"
+    volumes:
+      - ~/docker/postgres/master/data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:

@@ -14,10 +14,15 @@ import com.itmo.blss.service.TicketDbService
 import com.itmo.blss.service.TicketService
 import com.itmo.blss.service.TrainsDbService
 import com.itmo.blss.service.VansDbService
+import jakarta.annotation.PostConstruct
+import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
-import kotlin.RuntimeException
+import java.time.Duration
+import java.util.concurrent.ExecutorService
 
 @Service
 class TicketServiceImpl(
@@ -28,8 +33,17 @@ class TicketServiceImpl(
     private val seatsDbService: SeatsDbService,
     private val vansDbService: VansDbService,
     private val trainsDbService: TrainsDbService,
-    private val routesDbService: RoutesDbService
+    private val routesDbService: RoutesDbService,
+    private val billingConsumer: KafkaConsumer<String, String>,
+    private val executorService: ExecutorService
 ) : TicketService {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    @PostConstruct
+    fun postConstruct() {
+        executorService.execute(this::initKafkaConsumer)
+    }
 
     @Transactional
     override fun createTicket(userId: Long, userInfoDto: UserTicketInfo): Ticket {
@@ -55,6 +69,10 @@ class TicketServiceImpl(
         return ticketDbService.getTicketsInfoByFilter(ticketFilter)
     }
 
+    override fun addBillingInfo(userId: Long, transactionStatus: TransactionStatus) {
+        receiptDbService.updateTransactionInfo(userId, transactionStatus)
+    }
+
     private fun UserTicketInfo.toDbTicket(userId: Long) = Ticket(
         userId = userId,
         name = this.name,
@@ -70,7 +88,7 @@ class TicketServiceImpl(
             if (!routesDbService.isRouteExist(routeId)) {
                 throw RuntimeException("Route with id $routeId is not exist")
             }
-            if (!trainsDbService.getTrains(routeId.toInt()).map {it.trainId}.contains(trainId)) {
+            if (!trainsDbService.getTrains(routeId.toInt()).map { it.trainId }.contains(trainId)) {
                 throw RuntimeException("Train with id $trainId is not presented in route with id $routeId")
             }
             if (!vansDbService.getVansByTrainId(trainId).map { it.vanId }.contains(vanId)) {
@@ -84,5 +102,20 @@ class TicketServiceImpl(
 
     private fun calculatePrice(userInfoDto: UserTicketInfo): Long {
         return userInfoDto.seatId * userInfoDto.vanId * userInfoDto.routeId
+    }
+
+    private fun initKafkaConsumer() {
+        logger.info("Start listening messages from billing service")
+        billingConsumer.subscribe(listOf("billing-transactions-result"))
+        while (true) {
+            val records: ConsumerRecords<String, String> = billingConsumer.poll(Duration.ofMillis(100))
+            for (record in records) {
+                logger.info("Key: " + record.key() + ", Value: " + record.value())
+                logger.info("Partition: " + record.partition() + ", Offset:" + record.offset())
+                val values = record.value().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val userId = values[0].toLong()
+                addBillingInfo(userId, TransactionStatus.DONE)
+            }
+        }
     }
 }

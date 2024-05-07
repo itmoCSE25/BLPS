@@ -67,4 +67,10 @@ create table receipt
     transaction_id int,
     transaction_status int,
     unique (transaction_id)
+);
+
+create table test
+(
+    id serial primary key,
+    name text
 )

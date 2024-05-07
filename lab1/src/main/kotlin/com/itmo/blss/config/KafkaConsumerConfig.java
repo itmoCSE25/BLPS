@@ -35,6 +35,7 @@ public class KafkaConsumerConfig {
         return new KafkaConsumer<>(properties);
     }
 
+
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -43,7 +44,7 @@ public class KafkaConsumerConfig {
                 bootstrapServer);
         props.put(
                 ConsumerConfig.GROUP_ID_CONFIG,
-                123);
+                "my-unique-group");
         props.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
