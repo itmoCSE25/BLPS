@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -18,21 +19,25 @@ public class MessageListenerService {
 
     private final KafkaConsumer<String, String> kafkaConsumer;
 
-    private final MessageSenderService messageSenderService;
+    private final UtilService utilService;
 
     private final ExecutorService executorService;
 
     private final TransactionTemplate transactionTemplate;
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
     private final Logger logger = LoggerFactory.getLogger(MessageListenerService.class);
 
     public MessageListenerService(KafkaConsumer<String, String> kafkaConsumer,
-                                  MessageSenderService messageSenderService,
-                                  ExecutorService executorService, TransactionTemplate transactionTemplate) {
+                                  UtilService utilService, ExecutorService executorService,
+                                  TransactionTemplate transactionTemplate,
+                                  KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaConsumer = kafkaConsumer;
-        this.messageSenderService = messageSenderService;
+        this.utilService = utilService;
         this.executorService = executorService;
         this.transactionTemplate = transactionTemplate;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @PostConstruct
@@ -46,12 +51,11 @@ public class MessageListenerService {
             while (true) {
                 ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> record : records) {
-                    transactionTemplate.execute(s -> {
-                        System.out.println("Received message: " + record.value());
-                        messageSenderService.processMessage(record.value());
-                        throw new RuntimeException();
-//                        return null;
-                    });
+                    try {
+                        utilService.processMessage(record);
+                    } catch (Exception e) {
+                        logger.error("Transaction was rolled back because of: " + e);
+                    }
                 }
             }
         } catch (Exception e) {

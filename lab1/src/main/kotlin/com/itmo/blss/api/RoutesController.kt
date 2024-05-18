@@ -30,7 +30,6 @@ import java.time.Instant
 class RoutesController(
     private val routesDbService: RoutesDbService,
     private val routeService: RoutesService,
-    private val transactionTemplate: TransactionTemplate
 ) {
 
     @GetMapping
@@ -61,9 +60,7 @@ class RoutesController(
     fun createRoute(
         @RequestBody createRouteDto: CreateRouteDto
     ): ResponseEntity<Void> {
-        transactionTemplate.execute {
-            routeService.createRoute(createRouteDto)
-        }
+        routeService.createRoute(createRouteDto)
         return ResponseEntity.ok().build()
     }
 

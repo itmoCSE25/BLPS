@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/station")
 class StationController(
     private val stationDbService: StationDbService,
-    private val transactionTemplate: TransactionTemplate
 ) {
 
     @GetMapping
@@ -30,9 +29,7 @@ class StationController(
     fun createStation(
         @RequestBody createStation: CreateStationDto
     ): ResponseEntity<Void> {
-        transactionTemplate.execute {
-            stationDbService.createStation(Station(name = createStation.name))
-        }
+        stationDbService.createStation(Station(name = createStation.name))
         return ResponseEntity.ok().build()
     }
 

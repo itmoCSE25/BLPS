@@ -13,7 +13,7 @@ class SeatsService(
     private val vansDbService: VansDbService
 ) {
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     fun addSeats(seats: List<Seat>) {
         for (seat in seats) {
             val van = vansDbService.getVan(seat.vanId)

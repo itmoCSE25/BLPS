@@ -16,7 +16,7 @@ class RoutesServiceImpl(
     private val routesDbService: RoutesDbService
 ) : RoutesService {
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     override fun createRoute(createRouteDto: CreateRouteDto) {
         validateCreateDto(createRouteDto)
         try {

@@ -54,7 +54,7 @@ class StationDbServiceImpl(
         ).size == ids.size
     }
 
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
     override fun createStation(station: Station) {
         val sql = """
             insert into stations (name) 
@@ -79,6 +79,7 @@ class StationDbServiceImpl(
         namedParameterJdbcTemplate. batchUpdate(updateSql, SqlParameterSourceUtils.createBatch(stations))
     }
 
+    @Transactional
     override fun clearStations() {
         namedParameterJdbcTemplate.update(
             "delete from stations where true",

@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,19 +24,24 @@ public class BillingClient implements BillingService {
 
     private final ExecutorService executorService;
 
-    public BillingClient(Producer<String, String> billingProducer, KafkaConsumer<String, String> billingConsumer,
-                         ExecutorService executorService) {
-        this.billingProducer = billingProducer;
+    private final ProducerFactory<String, String> producerFactory;
+
+    public BillingClient(KafkaConsumer<String, String> billingConsumer,
+                         ExecutorService executorService, ProducerFactory<String, String> producerFactory) {
+        this.producerFactory = producerFactory;
+        this.billingProducer = producerFactory.createProducer("billing-tx-");
         this.billingConsumer = billingConsumer;
         this.executorService = executorService;
     }
 
     @Override
     public void sendBillingInfo(int userId, double amount) {
+        billingProducer.beginTransaction();
         billingProducer.send(new ProducerRecord<>(
                 "billing-transactions",
                 String.valueOf(userId), "%d:%f".formatted(userId, amount)
         ));
+        billingProducer.commitTransaction();
     }
 
     @NotNull

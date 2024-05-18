@@ -42,7 +42,7 @@ class TicketServiceImpl(
 
     @PostConstruct
     fun postConstruct() {
-        executorService.execute(this::initKafkaConsumer)
+        // executorService.execute(this::initKafkaConsumer)
     }
 
     @Transactional
@@ -65,6 +65,7 @@ class TicketServiceImpl(
         }!!
     }
 
+    @Transactional
     override fun getTicketsInfoByFilter(ticketFilter: TicketFilter): List<TicketInfo> {
         return ticketDbService.getTicketsInfoByFilter(ticketFilter)
     }

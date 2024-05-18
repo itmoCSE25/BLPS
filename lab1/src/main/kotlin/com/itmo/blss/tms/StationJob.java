@@ -7,26 +7,26 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itmo.blss.model.db.Station;
 import com.itmo.blss.service.StationDbService;
-import jakarta.transaction.TransactionManager;
+import com.itmo.blss.service.impl.MasterDbService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class StationJob {
-
-    private final ConsumerFactory<String, String> consumerFactory;
 
     private final Producer<String, String> producer;
 
@@ -36,42 +36,49 @@ public class StationJob {
 
     private final StationDbService stationDbService;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final TransactionTemplate transactionTemplate;
 
-    private final JtaTransactionManager jtaTransactionManager;
-    private final TransactionManager transactionManager;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public StationJob(ConsumerFactory<String, String> consumerFactory, Producer<String, String> producer,
-                      KafkaConsumer<String, String> consumer,
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private final MasterDbService masterDbService;
+
+    private final ProducerFactory<String, String> producerFactory;
+
+    public StationJob(ConsumerFactory<String, String> consumerFactory,
                       ObjectMapper objectMapper,
                       StationDbService stationDbService, TransactionTemplate transactionTemplate,
-                      JtaTransactionManager transactionManager) {
-        this.consumerFactory = consumerFactory;
-        this.producer = producer;
+                      KafkaTemplate<String, String> kafkaTemplate, MasterDbService masterDbService,
+                      ProducerFactory<String, String> producerFactory) {
+        this.producer = producerFactory.createProducer("pr-tx-1-");
         this.consumer = consumerFactory.createConsumer();
         this.objectMapper = objectMapper;
         this.stationDbService = stationDbService;
         this.transactionTemplate = transactionTemplate;
-        this.jtaTransactionManager = transactionManager;
-        this.transactionManager = jtaTransactionManager.getTransactionManager();
+        this.kafkaTemplate = kafkaTemplate;
+        this.masterDbService = masterDbService;
+        this.producerFactory = producerFactory;
+        logger.info("DONE");
     }
 
     // every ten minutes
-    @Scheduled(cron = "0 */1 * * * ?")
+//    @Scheduled(cron = "0 */1 * * * ?")
+    @Transactional
     void action() {
-        producer.send(new ProducerRecord<>("train_manage_system", "key", "stations"));
-        stationDbService.clearStations();
         try {
-            transactionTemplate.execute(s -> {
-                getMessages();
-                return null;
-            });
-        }catch (Exception e) {
+            producer.beginTransaction();
+            producer.send(new ProducerRecord<>("train_manage_system", "key", "stations"));
+            stationDbService.clearStations();
+            getMessages();
+            producer.commitTransaction();
+        } catch (Exception e) {
             logger.error("Transaction was rolled back: " + e);
+            producer.abortTransaction();
+            throw new RuntimeException();
         }
     }
+
 
     private void getMessages() {
         try {
@@ -84,13 +91,18 @@ public class StationJob {
                     Pair<String, String> message = Pair.of(record.key(), record.value());
                     List<Station> stations;
                     try {
-                        stations = objectMapper.readValue(message.getValue(), new TypeReference<>() {
-                        });
+                        if (message.getKey().equals("ERROR")) {
+                            throw new Exception();
+                        }
+                        stations = objectMapper.readValue(
+                                message.getValue(),
+                                new TypeReference<>() {
+                                }
+                        );
+                        stationDbService.upsertStations(stations);
                     } catch (Exception e) {
                         logger.error("Some errors:" + e);
-                        continue;
                     }
-                    stationDbService.upsertStations(stations);
                     poolingFlag = false;
                 }
             }

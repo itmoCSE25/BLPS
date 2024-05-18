@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController
 class SeatsController(
     private val seatsDbService: SeatsDbService,
     private val seatsService: SeatsService,
-    private val transactionTemplate: TransactionTemplate
 ) {
 
     @GetMapping
@@ -40,9 +39,7 @@ class SeatsController(
     fun addSeats(
         @RequestBody createSeatsDto: List<CreateSeatsDto>
     ): ResponseEntity<Void> {
-        transactionTemplate.execute {
-            seatsService.addSeats(createSeatsDto.map { it.toModel() })
-        }
+        seatsService.addSeats(createSeatsDto.map { it.toModel() })
         return ResponseEntity.ok().build()
     }
 
