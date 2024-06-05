@@ -6,6 +6,8 @@ import com.itmo.blss.model.db.Seat
 import com.itmo.blss.service.SeatsDbService
 import com.itmo.blss.service.impl.SeatsService
 import com.itmo.blss.utils.ApiConstraints.Companion.VAN_ID_KEY
+import org.camunda.bpm.engine.delegate.DelegateExecution
+import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.support.TransactionTemplate
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 class SeatsController(
     private val seatsDbService: SeatsDbService,
     private val seatsService: SeatsService,
-) {
+) : JavaDelegate {
 
     @GetMapping
     fun getSeatsWithFilter(
@@ -51,4 +53,10 @@ class SeatsController(
     private fun CreateSeatsDto.toModel() = Seat(
         vanId = this.vanId
     )
+
+    override fun execute(p0: DelegateExecution) {
+        val vanId: Long = p0.getVariable("van") as Long
+        val res = seatsDbService.getSeatsByVanId(vanId)
+        p0.setVariable("seats", res.map { it.seatId })
+    }
 }

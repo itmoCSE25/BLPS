@@ -1,5 +1,6 @@
 package com.itmo.blss.api
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.itmo.blss.api.response.RouteDto
 import com.itmo.blss.model.RoutesFilter
 import com.itmo.blss.model.create.CreateRouteDto
@@ -10,6 +11,8 @@ import com.itmo.blss.utils.ApiConstraints.Companion.ARRIVAL_STATION_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.ARRIVAL_TIME_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.DEPARTURE_STATION_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.DEPARTURE_TIME_KEY
+import org.camunda.bpm.engine.delegate.DelegateExecution
+import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.support.TransactionTemplate
@@ -30,7 +33,8 @@ import java.time.Instant
 class RoutesController(
     private val routesDbService: RoutesDbService,
     private val routeService: RoutesService,
-) {
+    private val objectMapper: ObjectMapper
+) : JavaDelegate {
 
     @GetMapping
     fun getRoutesWithFilter(
@@ -71,4 +75,21 @@ class RoutesController(
         this.arrivalStation!!,
         this.departureStation!!
     )
+
+    override fun execute(delegateExecution: DelegateExecution) {
+        val arrivalTimeVal = delegateExecution.getVariable("arrivalTime") as String
+        val arrivalStationVal = delegateExecution.getVariable("arrivalStation") as String
+        val departureTimeVal = delegateExecution.getVariable("departureTime") as String
+        val departureStationVal = delegateExecution.getVariable("departureStation") as String
+
+        val res = routesDbService.getRoutesWithFilter(
+            RoutesFilter(
+                arrivalTime = if (arrivalTimeVal != "") Instant.parse(arrivalTimeVal) else null,
+                arrivalStation = if (arrivalStationVal == "") null else arrivalStationVal,
+                departureTime = if (departureTimeVal != "") Instant.parse(arrivalTimeVal) else null,
+                departureStation = if (departureStationVal == "") null else departureStationVal
+            )
+        )
+        delegateExecution.setVariable("routes", res.map { it.routeId })
+    }
 }

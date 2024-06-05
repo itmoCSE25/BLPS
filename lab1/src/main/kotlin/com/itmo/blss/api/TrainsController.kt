@@ -5,6 +5,8 @@ import com.itmo.blss.model.create.CreateTrainDto
 import com.itmo.blss.model.db.Train
 import com.itmo.blss.service.TrainsDbService
 import com.itmo.blss.utils.ApiConstraints.Companion.ROUTE_ID_KEY
+import org.camunda.bpm.engine.delegate.DelegateExecution
+import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.transaction.support.TransactionTemplate
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 class TrainsController(
     private val trainsDbService: TrainsDbService,
     private val transactionTemplate: TransactionTemplate
-) {
+) : JavaDelegate {
 
     @GetMapping
     fun getTrains(
@@ -53,4 +55,9 @@ class TrainsController(
         trainNum = this.trainNum,
         routeId = this.routeId
     )
+
+    override fun execute(p0: DelegateExecution) {
+        val routeId: Int = (p0.getVariable("route") as Long).toInt()
+        p0.setVariable("trains", trainsDbService.getTrains(routeId).map { it.trainId })
+    }
 }

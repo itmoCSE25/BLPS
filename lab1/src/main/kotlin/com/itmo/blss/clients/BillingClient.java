@@ -29,19 +29,18 @@ public class BillingClient implements BillingService {
     public BillingClient(KafkaConsumer<String, String> billingConsumer,
                          ExecutorService executorService, ProducerFactory<String, String> producerFactory) {
         this.producerFactory = producerFactory;
-        this.billingProducer = producerFactory.createProducer("billing-tx-");
+//        this.billingProducer = producerFactory.createProducer("billing-tx-");
+        this.billingProducer = null;
         this.billingConsumer = billingConsumer;
         this.executorService = executorService;
     }
 
     @Override
     public void sendBillingInfo(int userId, double amount) {
-        billingProducer.beginTransaction();
         billingProducer.send(new ProducerRecord<>(
                 "billing-transactions",
                 String.valueOf(userId), "%d:%f".formatted(userId, amount)
         ));
-        billingProducer.commitTransaction();
     }
 
     @NotNull

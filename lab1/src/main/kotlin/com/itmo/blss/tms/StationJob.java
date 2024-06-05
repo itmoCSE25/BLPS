@@ -51,7 +51,8 @@ public class StationJob {
                       StationDbService stationDbService, TransactionTemplate transactionTemplate,
                       KafkaTemplate<String, String> kafkaTemplate, MasterDbService masterDbService,
                       ProducerFactory<String, String> producerFactory) {
-        this.producer = producerFactory.createProducer("pr-tx-1-");
+//        this.producer = producerFactory.createProducer("pr-tx-1-");
+        this.producer = null;
         this.consumer = consumerFactory.createConsumer();
         this.objectMapper = objectMapper;
         this.stationDbService = stationDbService;
@@ -67,11 +68,9 @@ public class StationJob {
     @Transactional
     void action() {
         try {
-            producer.beginTransaction();
             producer.send(new ProducerRecord<>("train_manage_system", "key", "stations"));
             stationDbService.clearStations();
             getMessages();
-            producer.commitTransaction();
         } catch (Exception e) {
             logger.error("Transaction was rolled back: " + e);
             producer.abortTransaction();

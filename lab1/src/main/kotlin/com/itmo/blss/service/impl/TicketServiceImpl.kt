@@ -50,9 +50,9 @@ class TicketServiceImpl(
         checkUserInfoDto(userInfoDto)
         return transactionTemplate.execute {
             val ticket = ticketDbService.saveTicketInfo(userInfoDto.toDbTicket(userId))
-            billingClient.sendBillingInfo(
-                userId.toInt(), calculatePrice(userInfoDto).toDouble()
-            )
+            // billingClient.sendBillingInfo(
+            //     userId.toInt(), calculatePrice(userInfoDto).toDouble()
+            // )
             receiptDbService.saveReceiptInfo(
                 Receipt(
                     userId = userId,

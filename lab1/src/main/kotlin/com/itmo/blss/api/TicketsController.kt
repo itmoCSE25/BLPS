@@ -10,6 +10,8 @@ import com.itmo.blss.model.db.Ticket
 import com.itmo.blss.service.TicketService
 import com.itmo.blss.utils.ApiConstraints.Companion.TICKET_IDS_KEY
 import com.itmo.blss.utils.ApiConstraints.Companion.USER_ID_KEY
+import org.camunda.bpm.engine.delegate.DelegateExecution
+import org.camunda.bpm.engine.delegate.JavaDelegate
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/tickets")
 class TicketsController(
     private val ticketService: TicketService,
-) {
+): JavaDelegate {
 
     @PostMapping("/create")
     fun createTicketForUser(
@@ -69,5 +71,20 @@ class TicketsController(
             ticket.trainId == userInfoDto.trainId &&
             ticket.vanId == userInfoDto.vanId &&
             ticket.seatId == userInfoDto.seatId
+    }
+
+    override fun execute(p0: DelegateExecution) {
+        val userTicketInfo = UserTicketInfo(
+            name = p0.getVariable("name") as String,
+            surname = p0.getVariable("surname") as String,
+            birthday = p0.getVariable("birthday") as String,
+            routeId = p0.getVariable("route") as Long,
+            trainId = p0.getVariable("train") as Long,
+            vanId = p0.getVariable("van") as Long,
+            seatId = p0.getVariable("seat") as Long
+        )
+
+        ticketService.createTicket(1, userTicketInfo)
+        p0.setVariable("isOk", true)
     }
 }
